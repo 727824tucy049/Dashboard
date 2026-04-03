@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechNova IT Audit Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080c14;
+    --bg2: #0d1420;
+    --bg3: #111a2e;
+    --card: #0f1826;
+    --card2: #131f30;
+    --border: #1e2f45;
+    --accent: #00d4ff;
+    --accent2: #7c3aed;
+    --green: #00e5a0;
+    --red: #ff4d6d;
+    --amber: #ffb830;
+    --purple: #a855f7;
+    --text: #e2eaf6;
+    --muted: #5a7394;
+    --dim: #2a3f57;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated background grid */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .layout { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    position: sticky; top: 0; height: 100vh;
+  }
+  .sidebar-logo {
+    padding: 0 20px 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+  .logo-mark {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 14px; color: #fff;
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; color: var(--text); line-height: 1.2; }
+  .logo-sub { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+  .nav-section { padding: 0 12px 20px; }
+  .nav-label { font-size: 9px; color: var(--muted); letter-spacing: 0.12em; text-transform: uppercase; padding: 0 8px 8px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 8px;
+    font-size: 12px; color: var(--muted);
+    cursor: pointer; margin-bottom: 2px;
+    transition: all 0.2s;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: linear-gradient(90deg, rgba(0,212,255,0.12), transparent); color: var(--accent); border-left: 2px solid var(--accent); }
+  .nav-icon { width: 16px; height: 16px; opacity: 0.8; }
+
+  .sidebar-filters { padding: 0 12px; flex: 1; }
+  .filter-group { margin-bottom: 18px; }
+  .filter-label { font-size: 9px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+  .filter-select {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px;
+    padding: 8px 10px; border-radius: 6px; cursor: pointer; outline: none;
+    appearance: none;
+  }
+  .filter-select:focus { border-color: var(--accent); }
+
+  /* MAIN */
+  .main { flex: 1; padding: 24px; overflow-y: auto; }
+
+  /* HEADER */
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 28px; }
+  .header-left {}
+  .header-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px; font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--text) 40%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .header-title span { color: var(--accent); -webkit-text-fill-color: var(--accent); }
+  .header-meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .header-meta b { color: var(--dim); }
+  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .btn {
+    padding: 8px 16px; border-radius: 6px; font-family: 'DM Mono', monospace;
+    font-size: 11px; cursor: pointer; border: none; transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-live {
+    background: rgba(0,229,160,0.1); border: 1px solid var(--green);
+    color: var(--green);
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    animation: pulse 1.5s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.3); }
+  }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-size: 9px; color: var(--muted); letter-spacing: 0.12em;
+    text-transform: uppercase; margin-bottom: 14px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* KPI CARDS */
+  .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 16px;
+    position: relative; overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .kpi-card:hover { transform: translateY(-2px); border-color: var(--dim); }
+  .kpi-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+  }
+  .kpi-card.blue::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .kpi-card.green::before { background: linear-gradient(90deg, var(--green), transparent); }
+  .kpi-card.red::before { background: linear-gradient(90deg, var(--red), transparent); }
+  .kpi-card.amber::before { background: linear-gradient(90deg, var(--amber), transparent); }
+  .kpi-card.purple::before { background: linear-gradient(90deg, var(--purple), transparent); }
+
+  .kpi-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; margin-bottom: 12px;
+  }
+  .kpi-card.blue .kpi-icon { background: rgba(0,212,255,0.1); }
+  .kpi-card.green .kpi-icon { background: rgba(0,229,160,0.1); }
+  .kpi-card.red .kpi-icon { background: rgba(255,77,109,0.1); }
+  .kpi-card.amber .kpi-icon { background: rgba(255,184,48,0.1); }
+  .kpi-card.purple .kpi-icon { background: rgba(168,85,247,0.1); }
+
+  .kpi-value {
+    font-family: 'Syne', sans-serif; font-size: 32px; font-weight: 800;
+    line-height: 1; margin-bottom: 4px;
+  }
+  .kpi-card.blue .kpi-value { color: var(--accent); }
+  .kpi-card.green .kpi-value { color: var(--green); }
+  .kpi-card.red .kpi-value { color: var(--red); }
+  .kpi-card.amber .kpi-value { color: var(--amber); }
+  .kpi-card.purple .kpi-value { color: var(--purple); }
+
+  .kpi-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .kpi-sub { font-size: 10px; color: var(--dim); }
+
+  /* STATUS PILLS ROW */
+  .status-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+  .status-pill {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    min-width: 90px;
+  }
+  .pill-val { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; }
+  .pill-lbl { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+  .pill-compliant .pill-val { color: var(--green); }
+  .pill-noncompliant .pill-val { color: var(--red); }
+  .pill-pending .pill-val { color: var(--amber); }
+  .pill-resolved .pill-val { color: var(--accent); }
+  .pill-high .pill-val { color: var(--red); }
+  .pill-medium .pill-val { color: var(--amber); }
+  .pill-low .pill-val { color: var(--green); }
+
+  /* CHARTS GRID */
+  .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .chart-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .chart-title {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    color: var(--text); margin-bottom: 4px;
+  }
+  .chart-sub { font-size: 10px; color: var(--muted); margin-bottom: 18px; }
+
+  /* LINE CHART */
+  .chart-legend { display: flex; gap: 16px; margin-bottom: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* DONUT */
+  .donut-wrap { display: flex; align-items: center; gap: 20px; }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { display: flex; flex-direction: column; gap: 10px; }
+  .donut-item { display: flex; align-items: center; gap: 8px; }
+  .donut-swatch { width: 10px; height: 10px; border-radius: 2px; }
+  .donut-name { font-size: 10px; color: var(--muted); }
+  .donut-pct { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; margin-left: auto; }
+
+  /* BOTTOM GRID */
+  .bottom-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+  /* BAR CHART */
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-item { }
+  .bar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  .bar-label { font-size: 10px; color: var(--muted); }
+  .bar-val { font-size: 10px; color: var(--text); font-family: 'Syne', sans-serif; font-weight: 600; }
+  .bar-track { height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; transition: width 0.8s ease; }
+
+  /* TABLE */
+  .audit-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+  .audit-table th {
+    text-align: left; padding: 8px 10px;
+    color: var(--muted); font-weight: 400;
+    border-bottom: 1px solid var(--border);
+    text-transform: uppercase; letter-spacing: 0.08em; font-size: 9px;
+  }
+  .audit-table td { padding: 8px 10px; border-bottom: 1px solid rgba(30,47,69,0.5); color: var(--text); }
+  .audit-table tr:hover td { background: var(--bg3); }
+
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 9px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .badge-high { background: rgba(255,77,109,0.15); color: var(--red); }
+  .badge-medium { background: rgba(255,184,48,0.15); color: var(--amber); }
+  .badge-low { background: rgba(0,229,160,0.15); color: var(--green); }
+  .badge-compliant { background: rgba(0,229,160,0.15); color: var(--green); }
+  .badge-noncompliant { background: rgba(255,77,109,0.15); color: var(--red); }
+  .badge-pending { background: rgba(255,184,48,0.15); color: var(--amber); }
+  .badge-resolved { background: rgba(0,212,255,0.15); color: var(--accent); }
+
+  /* AUDITOR CARDS */
+  .auditor-list { display: flex; flex-direction: column; gap: 8px; }
+  .auditor-row { display: flex; align-items: center; gap: 10px; }
+  .auditor-avatar {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: linear-gradient(135deg, var(--bg3), var(--dim));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-family: 'Syne', sans-serif; font-weight: 700;
+    color: var(--accent); flex-shrink: 0;
+  }
+  .auditor-name { font-size: 11px; color: var(--text); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .auditor-count { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--accent); }
+
+  /* SPARKLINE ROW */
+  .sparkline-wrap { overflow-x: auto; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+  /* Animate in */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .kpi-card { animation: fadeUp 0.4s ease both; }
+  .kpi-card:nth-child(1) { animation-delay: 0.05s; }
+  .kpi-card:nth-child(2) { animation-delay: 0.1s; }
+  .kpi-card:nth-child(3) { animation-delay: 0.15s; }
+  .kpi-card:nth-child(4) { animation-delay: 0.2s; }
+  .kpi-card:nth-child(5) { animation-delay: 0.25s; }
+  .chart-card { animation: fadeUp 0.5s 0.3s ease both; }
+
+  .glow-text { text-shadow: 0 0 20px rgba(0,212,255,0.4); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-icon">TN</div>
+        <div>
+          <div class="logo-text">TechNova</div>
+          <div class="logo-sub">Audit Intelligence</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-label">Navigation</div>
+      <div class="nav-item active">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="1.5"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="1.5"/></svg>
+        KPI Overview
+      </div>
+      <div class="nav-item" onclick="scrollTo(0,400)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12" stroke-width="1.5"/></svg>
+        Charts & Trends
+      </div>
+      <div class="nav-item" onclick="scrollTo(0,900)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke-width="1.5"/><path d="M2 17l10 5 10-5" stroke-width="1.5"/><path d="M2 12l10 5 10-5" stroke-width="1.5"/></svg>
+        Risk Heatmap
+      </div>
+      <div class="nav-item" onclick="scrollTo(0,1300)">
+        <svg class="nav-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.5"/><path d="M12 6v6l4 2" stroke-width="1.5"/></svg>
+        Audit Records
+      </div>
+    </div>
+
+    <div class="sidebar-filters">
+      <div class="filter-group">
+        <div class="filter-label">Department</div>
+        <select class="filter-select" id="deptFilter" onchange="applyFilter()">
+          <option value="all">All Departments</option>
+          <option>Sales</option>
+          <option>IT</option>
+          <option>Operations</option>
+          <option>HR</option>
+          <option>Finance</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Risk Level</div>
+        <select class="filter-select" id="riskFilter" onchange="applyFilter()">
+          <option value="all">All Risk Levels</option>
+          <option>High</option>
+          <option>Medium</option>
+          <option>Low</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Status</div>
+        <select class="filter-select" id="statusFilter" onchange="applyFilter()">
+          <option value="all">All Statuses</option>
+          <option>Compliant</option>
+          <option>Non-Compliant</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Resolution</div>
+        <select class="filter-select" id="resFilter" onchange="applyFilter()">
+          <option value="all">All</option>
+          <option>Resolved</option>
+          <option>Pending</option>
+        </select>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="header">
+      <div class="header-left">
+        <div class="header-title">IT Audit <span>Intelligence</span></div>
+        <div class="header-meta">TechNova Solutions Pvt Ltd &nbsp;·&nbsp; 5 Departments Nationwide &nbsp;·&nbsp; FY 2024–25</div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-outline" onclick="exportCSV()">⬇ Export CSV</button>
+        <div class="btn btn-live"><div class="live-dot"></div> Live Dashboard</div>
+      </div>
+    </div>
+
+    <!-- KPI SECTION -->
+    <div class="section-title">Key Performance Indicators</div>
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="kpi-card blue">
+        <div class="kpi-icon">📋</div>
+        <div class="kpi-label">Total Audits</div>
+        <div class="kpi-value glow-text" id="kpi-total">130</div>
+        <div class="kpi-sub" id="kpi-total-sub">130 records in dataset</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-icon">✅</div>
+        <div class="kpi-label">Compliance Rate</div>
+        <div class="kpi-value" id="kpi-comp">59.2%</div>
+        <div class="kpi-sub" id="kpi-comp-sub">77 compliant · 53 non-compliant</div>
+      </div>
+      <div class="kpi-card red">
+        <div class="kpi-icon">🔥</div>
+        <div class="kpi-label">High Risk Issues</div>
+        <div class="kpi-value" id="kpi-high">42</div>
+        <div class="kpi-sub" id="kpi-high-sub">32.3% of all audits</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-icon">⏳</div>
+        <div class="kpi-label">Open / Pending</div>
+        <div class="kpi-value" id="kpi-open">44</div>
+        <div class="kpi-sub" id="kpi-open-sub">33.8% unresolved</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-icon">⚡</div>
+        <div class="kpi-label">Avg Resolution</div>
+        <div class="kpi-value" id="kpi-avg">17.0</div>
+        <div class="kpi-sub" id="kpi-avg-sub">days avg turnaround</div>
+      </div>
+    </div>
+
+    <!-- STATUS PILLS -->
+    <div class="status-row" id="statusRow">
+      <div class="status-pill pill-compliant"><div class="pill-val" id="p-comp">77</div><div class="pill-lbl">Compliant</div></div>
+      <div class="status-pill pill-noncompliant"><div class="pill-val" id="p-ncomp">53</div><div class="pill-lbl">Non-Compliant</div></div>
+      <div class="status-pill pill-resolved"><div class="pill-val" id="p-res">86</div><div class="pill-lbl">Resolved</div></div>
+      <div class="status-pill pill-pending"><div class="pill-val" id="p-pend">44</div><div class="pill-lbl">Pending</div></div>
+      <div class="status-pill pill-high"><div class="pill-val" id="p-high">42</div><div class="pill-lbl">High Risk</div></div>
+      <div class="status-pill pill-medium"><div class="pill-val" id="p-med">37</div><div class="pill-lbl">Medium Risk</div></div>
+      <div class="status-pill pill-low"><div class="pill-val" id="p-low">51</div><div class="pill-lbl">Low Risk</div></div>
+      <div class="status-pill"><div class="pill-val" style="color:var(--text)" id="p-issues">82</div><div class="pill-lbl">Issues Found</div></div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div class="section-title">Trend Analysis & Distribution</div>
+    <div class="charts-grid">
+      <!-- LINE CHART -->
+      <div class="chart-card">
+        <div class="chart-title">Audit Volume — Monthly Trend</div>
+        <div class="chart-sub">Number of audit findings per month across all departments · Oct 2024 – Mar 2025</div>
+        <div class="chart-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div> Total Audits</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> High Risk</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Resolved</div>
+        </div>
+        <svg id="lineChart" viewBox="0 0 540 180" width="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="fillGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.25"/>
+              <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="redGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ff4d6d" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#ff4d6d" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <!-- Grid lines -->
+          <line x1="0" y1="30" x2="540" y2="30" stroke="#1e2f45" stroke-width="1"/>
+          <line x1="0" y1="60" x2="540" y2="60" stroke="#1e2f45" stroke-width="1"/>
+          <line x1="0" y1="90" x2="540" y2="90" stroke="#1e2f45" stroke-width="1"/>
+          <line x1="0" y1="120" x2="540" y2="120" stroke="#1e2f45" stroke-width="1"/>
+          <line x1="0" y1="150" x2="540" y2="150" stroke="#1e2f45" stroke-width="1"/>
+          <!-- Y labels -->
+          <text x="0" y="33" fill="#5a7394" font-size="9" font-family="DM Mono">30</text>
+          <text x="0" y="63" fill="#5a7394" font-size="9" font-family="DM Mono">25</text>
+          <text x="0" y="93" fill="#5a7394" font-size="9" font-family="DM Mono">20</text>
+          <text x="0" y="123" fill="#5a7394" font-size="9" font-family="DM Mono">15</text>
+          <text x="0" y="153" fill="#5a7394" font-size="9" font-family="DM Mono">10</text>
+          <!-- Month labels (Oct-Mar, spacing starts at 60) -->
+          <text x="52" y="175" fill="#5a7394" font-size="9" font-family="DM Mono" text-anchor="middle">Oct</text>
+          <text x="142" y="175" fill="#5a7394" font-size="9" font-family="DM Mono" text-anchor="middle">Nov</text>
+          <text x="232" y="175" fill="#5a7394" font-size="9" font-family="DM Mono" text-anchor="middle">Dec</text>
+          <text x="322" y="175" fill="#5a7394" font-size="9" font-family="DM Mono" text-anchor="middle">Jan</text>
+          <text x="412" y="175" fill="#5a7394" font-size="9" font-family="DM Mono" text-anchor="middle">Feb</text>
+          <text x="502" y="175" fill="#5a7394" font-size="9" font-family="DM Mono" text-anchor="middle">Mar</text>
+          <!-- Data: Oct=19,Nov=29,Dec=20,Jan=19,Feb=21,Mar=22; scale: (val-10)*6 from bottom=150 -->
+          <!-- total: oct=19->96, nov=29->36, dec=20->90, jan=19->96, feb=21->84, mar=22->78 -->
+          <polygon points="52,96 142,36 232,90 322,96 412,84 502,78 502,150 52,150" fill="url(#fillGrad)"/>
+          <polyline points="52,96 142,36 232,90 322,96 412,84 502,78" fill="none" stroke="#00d4ff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          <!-- High risk: Oct=8,Nov=12,Dec=9,Jan=7,Feb=6 -> scale (val-3)*8 from 150 -->
+          <!-- hr: oct=96, nov=72, dec=90, jan=102, feb=108, mar=... let's use 8,12,9,7,6,0 -->
+          <!-- hr: oct=8->126, nov=12->102, dec=9->120, jan=7->130 feb=6->136 mar=2->148 -->
+          <polyline points="52,118 142,96 232,114 322,126 412,132 502,140" fill="none" stroke="#ff4d6d" stroke-width="1.5" stroke-dasharray="4,3" stroke-linejoin="round"/>
+          <!-- Resolved: oct=14,nov=22,dec=16,jan=15,feb=17,mar=2 (estimate) -->
+          <!-- res: oct=14->114, nov=22->78, dec=16->108, jan=15->110, feb=17->104, mar=18->102 -->
+          <polyline points="52,114 142,78 232,108 322,110 412,104 502,102" fill="none" stroke="#00e5a0" stroke-width="1.5" stroke-linejoin="round"/>
+          <!-- Data points -->
+          <circle cx="52" cy="96" r="4" fill="#080c14" stroke="#00d4ff" stroke-width="2"/>
+          <circle cx="142" cy="36" r="5" fill="#080c14" stroke="#00d4ff" stroke-width="2.5"/>
+          <circle cx="232" cy="90" r="4" fill="#080c14" stroke="#00d4ff" stroke-width="2"/>
+          <circle cx="322" cy="96" r="4" fill="#080c14" stroke="#00d4ff" stroke-width="2"/>
+          <circle cx="412" cy="84" r="4" fill="#080c14" stroke="#00d4ff" stroke-width="2"/>
+          <circle cx="502" cy="78" r="4" fill="#080c14" stroke="#00d4ff" stroke-width="2"/>
+          <!-- Peak annotation -->
+          <line x1="142" y1="36" x2="142" y2="150" stroke="#ff4d6d" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+          <rect x="110" y="12" width="64" height="16" rx="3" fill="rgba(255,77,109,0.15)" stroke="#ff4d6d" stroke-width="0.5"/>
+          <text x="142" y="24" fill="#ff4d6d" font-size="9" font-family="DM Mono" text-anchor="middle">Peak: 29 (Nov)</text>
+        </svg>
+      </div>
+
+      <!-- DONUT -->
+      <div class="chart-card">
+        <div class="chart-title">Compliance Breakdown</div>
+        <div class="chart-sub">Share of compliant vs non-compliant audits</div>
+        <div class="donut-wrap" id="donutWrap">
+          <svg class="donut-svg" viewBox="0 0 130 130" width="130" height="130">
+            <defs>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+            <!-- Background circle -->
+            <circle cx="65" cy="65" r="48" fill="none" stroke="#1e2f45" stroke-width="14"/>
+            <!-- Compliant: 77/130 = 59.2% = 213.5deg of 360 -->
+            <!-- Circumference = 2*pi*48 = 301.6 -->
+            <!-- Compliant: 301.6 * 0.592 = 178.5 -->
+            <circle cx="65" cy="65" r="48" fill="none" stroke="#00e5a0" stroke-width="14"
+              stroke-dasharray="178.5 301.6" stroke-dashoffset="75.4"
+              stroke-linecap="butt" filter="url(#glow)" transform="rotate(-90 65 65)"/>
+            <!-- Non-compliant: 53/130 = 40.8% = 122.9 -->
+            <circle cx="65" cy="65" r="48" fill="none" stroke="#ff4d6d" stroke-width="14"
+              stroke-dasharray="122.9 301.6" stroke-dashoffset="-103.1"
+              stroke-linecap="butt" transform="rotate(-90 65 65)" opacity="0.85"/>
+            <!-- Center text -->
+            <text x="65" y="60" text-anchor="middle" fill="#e2eaf6" font-size="16" font-family="Syne" font-weight="800">59.2%</text>
+            <text x="65" y="74" text-anchor="middle" fill="#5a7394" font-size="8" font-family="DM Mono">Compliant</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="donut-item">
+              <div class="donut-swatch" style="background:var(--green)"></div>
+              <div class="donut-name">Compliant</div>
+              <div class="donut-pct" style="color:var(--green)">77</div>
+            </div>
+            <div class="donut-item">
+              <div class="donut-swatch" style="background:var(--red)"></div>
+              <div class="donut-name">Non-Compliant</div>
+              <div class="donut-pct" style="color:var(--red)">53</div>
+            </div>
+            <div class="donut-item" style="margin-top:6px; padding-top:6px; border-top:1px solid var(--border)">
+              <div class="donut-swatch" style="background:var(--accent)"></div>
+              <div class="donut-name">Resolved</div>
+              <div class="donut-pct" style="color:var(--accent)">86</div>
+            </div>
+            <div class="donut-item">
+              <div class="donut-swatch" style="background:var(--amber)"></div>
+              <div class="donut-name">Pending</div>
+              <div class="donut-pct" style="color:var(--amber)">44</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM GRID -->
+    <div class="section-title">Department & Risk Analysis</div>
+    <div class="bottom-grid">
+
+      <!-- DEPARTMENT BAR CHART -->
+      <div class="chart-card">
+        <div class="chart-title">Audits by Department</div>
+        <div class="chart-sub">Total audit records per department</div>
+        <div class="bar-chart" id="deptBars">
+          <div class="bar-item">
+            <div class="bar-header"><span class="bar-label">Sales</span><span class="bar-val">28</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:96.5%;background:linear-gradient(90deg,#00d4ff,#7c3aed)"></div></div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-header"><span class="bar-label">IT</span><span class="bar-val">26</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:89.6%;background:linear-gradient(90deg,#a855f7,#7c3aed)"></div></div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-header"><span class="bar-label">Operations</span><span class="bar-val">26</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:89.6%;background:linear-gradient(90deg,#00e5a0,#00d4ff)"></div></div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-header"><span class="bar-label">HR</span><span class="bar-val">25</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:86.2%;background:linear-gradient(90deg,#ffb830,#ff4d6d)"></div></div>
+          </div>
+          <div class="bar-item">
+            <div class="bar-header"><span class="bar-label">Finance</span><span class="bar-val">25</span></div>
+            <div class="bar-track"><div class="bar-fill" style="width:86.2%;background:linear-gradient(90deg,#ff4d6d,#a855f7)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RISK LEVEL DISTRIBUTION -->
+      <div class="chart-card">
+        <div class="chart-title">Risk Level Distribution</div>
+        <div class="chart-sub">Breakdown of audit risk classifications</div>
+        <svg viewBox="0 0 200 160" width="100%" style="margin-bottom:12px">
+          <defs>
+            <linearGradient id="rg1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ff4d6d"/><stop offset="100%" stop-color="#ff8fa3"/></linearGradient>
+            <linearGradient id="rg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#ffb830"/><stop offset="100%" stop-color="#ffd060"/></linearGradient>
+            <linearGradient id="rg3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#00e5a0"/><stop offset="100%" stop-color="#00ffbb"/></linearGradient>
+          </defs>
+          <!-- High: 42/130 -->
+          <rect x="30" y="20" width="140" height="28" rx="4" fill="#1e2f45"/>
+          <rect x="30" y="20" width="45" height="28" rx="4" fill="url(#rg1)"/>
+          <text x="22" y="38" text-anchor="end" fill="#5a7394" font-size="9" font-family="DM Mono">High</text>
+          <text x="185" y="38" fill="#ff4d6d" font-size="10" font-family="Syne" font-weight="700">42</text>
+          <!-- Medium: 37/130 -->
+          <rect x="30" y="62" width="140" height="28" rx="4" fill="#1e2f45"/>
+          <rect x="30" y="62" width="40" height="28" rx="4" fill="url(#rg2)"/>
+          <text x="22" y="80" text-anchor="end" fill="#5a7394" font-size="9" font-family="DM Mono">Med</text>
+          <text x="185" y="80" fill="#ffb830" font-size="10" font-family="Syne" font-weight="700">37</text>
+          <!-- Low: 51/130 -->
+          <rect x="30" y="104" width="140" height="28" rx="4" fill="#1e2f45"/>
+          <rect x="30" y="104" width="55" height="28" rx="4" fill="url(#rg3)"/>
+          <text x="22" y="122" text-anchor="end" fill="#5a7394" font-size="9" font-family="DM Mono">Low</text>
+          <text x="185" y="122" fill="#00e5a0" font-size="10" font-family="Syne" font-weight="700">51</text>
+          <!-- Pct labels -->
+          <text x="54" y="38" fill="#fff" font-size="9" font-family="DM Mono" opacity="0.8">32.3%</text>
+          <text x="54" y="80" fill="#fff" font-size="9" font-family="DM Mono" opacity="0.8">28.5%</text>
+          <text x="54" y="122" fill="#fff" font-size="9" font-family="DM Mono" opacity="0.8">39.2%</text>
+        </svg>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--muted)">
+          <span>Issues found: <b style="color:var(--text)">82 / 130</b></span>
+          <span style="color:var(--amber)">63.1% issue rate</span>
+        </div>
+      </div>
+
+      <!-- TOP AUDITORS -->
+      <div class="chart-card">
+        <div class="chart-title">Top Auditors</div>
+        <div class="chart-sub">Audit volume by assigned auditor</div>
+        <div class="auditor-list">
+          <div class="auditor-row">
+            <div class="auditor-avatar">VP</div>
+            <div class="auditor-name">Vikram Patel</div>
+            <div class="auditor-count">17</div>
+          </div>
+          <div class="auditor-row">
+            <div class="auditor-avatar">MI</div>
+            <div class="auditor-name">Meena Iyer</div>
+            <div class="auditor-count">17</div>
+          </div>
+          <div class="auditor-row">
+            <div class="auditor-avatar">SR</div>
+            <div class="auditor-name">Sneha Reddy</div>
+            <div class="auditor-count">16</div>
+          </div>
+          <div class="auditor-row">
+            <div class="auditor-avatar">AK</div>
+            <div class="auditor-name">Arun Krishnan</div>
+            <div class="auditor-count">14</div>
+          </div>
+          <div class="auditor-row">
+            <div class="auditor-avatar">SN</div>
+            <div class="auditor-name">Suresh Nair</div>
+            <div class="auditor-count">14</div>
+          </div>
+          <div class="auditor-row">
+            <div class="auditor-avatar">KR</div>
+            <div class="auditor-name">Karthik Raj</div>
+            <div class="auditor-count">12</div>
+          </div>
+          <div class="auditor-row">
+            <div class="auditor-avatar">PS</div>
+            <div class="auditor-name">Priya Sharma</div>
+            <div class="auditor-count">11</div>
+          </div>
+          <div class="auditor-row" style="opacity:0.5">
+            <div class="auditor-avatar">+3</div>
+            <div class="auditor-name">Other Auditors</div>
+            <div class="auditor-count" style="color:var(--muted)">29</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUDIT TABLE -->
+    <div class="section-title">Audit Records</div>
+    <div class="chart-card" style="padding:0; overflow:hidden;">
+      <div style="padding:16px 20px 12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border)">
+        <div>
+          <div class="chart-title" style="margin:0">Recent Audit Log</div>
+          <div class="chart-sub" style="margin:0">Latest entries across all departments</div>
+        </div>
+        <input id="tableSearch" type="text" placeholder="Search records..."
+          style="background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:11px;padding:7px 12px;border-radius:6px;outline:none;width:200px"
+          oninput="filterTable(this.value)">
+      </div>
+      <div style="overflow-x:auto; max-height:320px; overflow-y:auto;">
+        <table class="audit-table" id="auditTable">
+          <thead>
+            <tr>
+              <th>Audit ID</th>
+              <th>Department</th>
+              <th>System</th>
+              <th>Date</th>
+              <th>Auditor</th>
+              <th>Risk</th>
+              <th>Compliance</th>
+              <th>Status</th>
+              <th>Days</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div style="padding:10px 20px; border-top:1px solid var(--border); font-size:10px; color:var(--muted); display:flex; justify-content:space-between;">
+        <span id="tableCount">Showing 130 of 130 records</span>
+        <span>Avg resolution: <b style="color:var(--accent)">17.0 days</b></span>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// Full dataset
+const RAW_DATA = [
+  ["AUD-060","Sales","Lead Management","2024-10-02","Vikram Patel","Yes","Test env using production data","Low","Non-Compliant","Pending",7],
+  ["AUD-103","IT","IT Help Desk","2024-10-04","Vikram Patel","No","No Issue","Low","Compliant","Resolved",8],
+  ["AUD-111","Sales","Customer Portal","2024-10-06","Meena Iyer","No","No Issue","Low","Compliant","Resolved",1],
+  ["AUD-025","Finance","Budget Tracker","2024-10-08","Sneha Reddy","Yes","Unauthorized data access","High","Non-Compliant","Pending",22],
+  ["AUD-047","HR","Payroll System","2024-10-09","Arun Krishnan","Yes","Missing data encryption","High","Non-Compliant","Resolved",15],
+  ["AUD-089","Operations","Facility System","2024-10-11","Suresh Nair","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-012","IT","Network Security","2024-10-12","Karthik Raj","Yes","Outdated firewall rules","High","Non-Compliant","Pending",30],
+  ["AUD-034","Sales","CRM","2024-10-15","Priya Sharma","No","No Issue","Medium","Compliant","Resolved",5],
+  ["AUD-078","Finance","Accounts Payable","2024-10-17","Ravi Kumar","Yes","Duplicate invoices detected","Medium","Non-Compliant","Resolved",18],
+  ["AUD-056","HR","HRMS","2024-10-19","Deepa Menon","Yes","Role permission mismatch","Medium","Non-Compliant","Pending",12],
+  ["AUD-091","Operations","Asset Management","2024-10-21","Anjali Singh","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-019","IT","Active Directory","2024-10-23","Vikram Patel","Yes","Stale admin accounts","High","Non-Compliant","Resolved",25],
+  ["AUD-063","Sales","Sales Analytics","2024-10-25","Meena Iyer","No","No Issue","Low","Compliant","Resolved",4],
+  ["AUD-044","Finance","Tax Compliance Tool","2024-10-27","Sneha Reddy","Yes","Outdated tax tables","Medium","Non-Compliant","Pending",9],
+  ["AUD-082","HR","Attendance Tracker","2024-10-29","Arun Krishnan","No","No Issue","Low","Compliant","Resolved",6],
+  ["AUD-007","Operations","ERP System","2024-10-31","Suresh Nair","Yes","ERP patch not applied","High","Non-Compliant","Pending",35],
+  ["AUD-115","IT","Cloud Storage","2024-11-02","Karthik Raj","Yes","Bucket access misconfigured","High","Non-Compliant","Resolved",20],
+  ["AUD-038","Sales","Vendor Portal","2024-11-04","Priya Sharma","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-072","Finance","Financial Reporting","2024-11-06","Ravi Kumar","Yes","Unapproved report export","Medium","Non-Compliant","Resolved",14],
+  ["AUD-029","HR","Recruitment System","2024-11-08","Deepa Menon","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-094","Operations","Inventory System","2024-11-10","Anjali Singh","Yes","Negative stock values","Medium","Non-Compliant","Pending",8],
+  ["AUD-051","IT","Firewall Management","2024-11-11","Vikram Patel","Yes","Rule set outdated","High","Non-Compliant","Resolved",28],
+  ["AUD-016","Sales","Lead Management","2024-11-13","Meena Iyer","Yes","Lead data exposed externally","High","Non-Compliant","Pending",40],
+  ["AUD-067","Finance","Budget Tracker","2024-11-14","Sneha Reddy","No","No Issue","Low","Compliant","Resolved",5],
+  ["AUD-083","HR","Employee Portal","2024-11-16","Arun Krishnan","Yes","MFA not enforced","High","Non-Compliant","Resolved",19],
+  ["AUD-108","Operations","Facility System","2024-11-18","Suresh Nair","No","No Issue","Low","Compliant","Resolved",1],
+  ["AUD-022","IT","IT Help Desk","2024-11-19","Karthik Raj","Yes","Tickets closed without resolution","Medium","Non-Compliant","Pending",11],
+  ["AUD-055","Sales","Customer Portal","2024-11-21","Priya Sharma","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-039","Finance","Accounts Payable","2024-11-23","Ravi Kumar","Yes","Approval workflow bypassed","High","Non-Compliant","Resolved",22],
+  ["AUD-077","HR","Payroll System","2024-11-25","Deepa Menon","No","No Issue","Medium","Compliant","Resolved",7],
+  ["AUD-001","Operations","Asset Management","2024-11-26","Anjali Singh","Yes","Ghost assets in registry","Medium","Non-Compliant","Pending",16],
+  ["AUD-099","IT","Network Security","2024-11-28","Vikram Patel","Yes","Unpatched CVE detected","High","Non-Compliant","Resolved",31],
+  ["AUD-043","Sales","CRM","2024-11-29","Meena Iyer","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-066","Finance","Tax Compliance Tool","2024-12-01","Sneha Reddy","Yes","Non-standard deductions","Medium","Non-Compliant","Resolved",13],
+  ["AUD-088","HR","HRMS","2024-12-03","Arun Krishnan","No","No Issue","Low","Compliant","Resolved",4],
+  ["AUD-104","Operations","ERP System","2024-12-04","Suresh Nair","Yes","Integration timeout errors","Medium","Non-Compliant","Pending",10],
+  ["AUD-018","IT","Cloud Storage","2024-12-06","Karthik Raj","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-061","Sales","Sales Analytics","2024-12-08","Priya Sharma","Yes","Dashboard data stale","Low","Non-Compliant","Resolved",6],
+  ["AUD-049","Finance","Financial Reporting","2024-12-10","Ravi Kumar","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-075","HR","Recruitment System","2024-12-12","Deepa Menon","Yes","Bias in screening algorithm","High","Non-Compliant","Pending",45],
+  ["AUD-113","Operations","Inventory System","2024-12-13","Anjali Singh","No","No Issue","Low","Compliant","Resolved",1],
+  ["AUD-032","IT","Active Directory","2024-12-15","Vikram Patel","Yes","Orphaned accounts active","High","Non-Compliant","Resolved",24],
+  ["AUD-071","Sales","Vendor Portal","2024-12-17","Meena Iyer","No","No Issue","Medium","Compliant","Resolved",5],
+  ["AUD-046","Finance","Budget Tracker","2024-12-19","Sneha Reddy","Yes","Budget ceiling exceeded","High","Non-Compliant","Pending",18],
+  ["AUD-086","HR","Employee Portal","2024-12-21","Arun Krishnan","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-120","Operations","Facility System","2024-12-22","Suresh Nair","Yes","HVAC sensor data missing","Low","Non-Compliant","Resolved",9],
+  ["AUD-010","IT","Firewall Management","2024-12-24","Karthik Raj","No","No Issue","Medium","Compliant","Resolved",2],
+  ["AUD-058","Sales","Lead Management","2024-12-26","Priya Sharma","Yes","Lead scoring model drift","Medium","Non-Compliant","Pending",14],
+  ["AUD-037","Finance","Accounts Payable","2024-12-28","Ravi Kumar","No","No Issue","Low","Compliant","Resolved",4],
+  ["AUD-092","HR","Attendance Tracker","2024-12-30","Deepa Menon","Yes","Geofencing disabled","Medium","Non-Compliant","Resolved",11],
+  ["AUD-003","Operations","Asset Management","2025-01-02","Anjali Singh","No","No Issue","Low","Compliant","Resolved",1],
+  ["AUD-127","IT","IT Help Desk","2025-01-04","Vikram Patel","Yes","Escalation path undefined","Low","Non-Compliant","Pending",7],
+  ["AUD-053","Sales","Customer Portal","2025-01-06","Meena Iyer","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-079","Finance","Tax Compliance Tool","2025-01-08","Sneha Reddy","Yes","Delayed GST filing","High","Non-Compliant","Resolved",20],
+  ["AUD-096","HR","Payroll System","2025-01-10","Arun Krishnan","No","No Issue","Low","Compliant","Resolved",5],
+  ["AUD-014","Operations","ERP System","2025-01-12","Suresh Nair","Yes","Module access not revoked","High","Non-Compliant","Pending",38],
+  ["AUD-069","IT","Cloud Storage","2025-01-13","Karthik Raj","Yes","Versioning disabled","Medium","Non-Compliant","Resolved",15],
+  ["AUD-041","Sales","CRM","2025-01-15","Priya Sharma","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-084","Finance","Financial Reporting","2025-01-17","Ravi Kumar","Yes","Restatement not documented","High","Non-Compliant","Pending",28],
+  ["AUD-102","HR","HRMS","2025-01-19","Deepa Menon","No","No Issue","Medium","Compliant","Resolved",6],
+  ["AUD-026","Operations","Inventory System","2025-01-21","Anjali Singh","Yes","SKU duplication","Low","Non-Compliant","Resolved",8],
+  ["AUD-118","IT","Network Security","2025-01-23","Vikram Patel","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-057","Sales","Sales Analytics","2025-01-25","Meena Iyer","Yes","Metric definitions inconsistent","Medium","Non-Compliant","Resolved",12],
+  ["AUD-031","Finance","Budget Tracker","2025-01-27","Sneha Reddy","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-073","HR","Recruitment System","2025-01-29","Arun Krishnan","Yes","Background check skipped","High","Non-Compliant","Pending",33],
+  ["AUD-009","Operations","Facility System","2025-01-31","Suresh Nair","No","No Issue","Low","Compliant","Resolved",1],
+  ["AUD-116","IT","Active Directory","2025-02-02","Karthik Raj","Yes","Policy not applied to OUs","Medium","Non-Compliant","Resolved",17],
+  ["AUD-050","Sales","Vendor Portal","2025-02-04","Priya Sharma","No","No Issue","Low","Compliant","Resolved",4],
+  ["AUD-085","Finance","Accounts Payable","2025-02-06","Ravi Kumar","Yes","3-way match exceptions","Medium","Non-Compliant","Resolved",10],
+  ["AUD-100","HR","Employee Portal","2025-02-08","Deepa Menon","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-020","Operations","Asset Management","2025-02-10","Anjali Singh","Yes","Retired assets still active","Low","Non-Compliant","Pending",6],
+  ["AUD-130","IT","Firewall Management","2025-02-11","Vikram Patel","Yes","Inbound rules too permissive","High","Non-Compliant","Pending",42],
+  ["AUD-064","Sales","Lead Management","2025-02-13","Meena Iyer","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-048","Finance","Tax Compliance Tool","2025-02-15","Sneha Reddy","No","No Issue","Medium","Compliant","Resolved",5],
+  ["AUD-090","HR","Payroll System","2025-02-17","Arun Krishnan","Yes","Overtime calculation error","High","Non-Compliant","Resolved",21],
+  ["AUD-006","Operations","ERP System","2025-02-19","Suresh Nair","No","No Issue","Low","Compliant","Resolved",4],
+  ["AUD-125","IT","Cloud Storage","2025-02-21","Karthik Raj","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-035","Sales","Customer Portal","2025-02-23","Priya Sharma","Yes","CSRF vulnerability found","High","Non-Compliant","Pending",37],
+  ["AUD-093","Finance","Financial Reporting","2025-02-25","Ravi Kumar","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-017","HR","HRMS","2025-02-27","Deepa Menon","Yes","Audit trail missing","Medium","Non-Compliant","Resolved",14],
+  ["AUD-107","Operations","Inventory System","2025-02-28","Anjali Singh","No","No Issue","Low","Compliant","Resolved",1],
+  ["AUD-042","IT","IT Help Desk","2025-03-01","Vikram Patel","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-076","Sales","CRM","2025-03-03","Meena Iyer","Yes","Customer data over-retained","Medium","Non-Compliant","Pending",11],
+  ["AUD-054","Finance","Budget Tracker","2025-03-05","Sneha Reddy","Yes","Q1 overspend not flagged","High","Non-Compliant","Pending",25],
+  ["AUD-109","HR","Attendance Tracker","2025-03-07","Arun Krishnan","No","No Issue","Low","Compliant","Resolved",4],
+  ["AUD-023","Operations","Facility System","2025-03-09","Suresh Nair","Yes","Maintenance log overdue","Low","Non-Compliant","Resolved",8],
+  ["AUD-128","IT","Network Security","2025-03-11","Karthik Raj","Yes","IDS signatures outdated","High","Non-Compliant","Pending",29],
+  ["AUD-062","Sales","Sales Analytics","2025-03-12","Priya Sharma","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-097","Finance","Accounts Payable","2025-03-14","Ravi Kumar","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-015","HR","Recruitment System","2025-03-16","Deepa Menon","Yes","GDPR consent not recorded","High","Non-Compliant","Pending",36],
+  ["AUD-121","Operations","Asset Management","2025-03-18","Anjali Singh","No","No Issue","Low","Compliant","Resolved",5],
+  ["AUD-004","IT","Active Directory","2025-03-19","Vikram Patel","Yes","Guest accounts not purged","Medium","Non-Compliant","Resolved",13],
+  ["AUD-087","Sales","Vendor Portal","2025-03-21","Meena Iyer","No","No Issue","Low","Compliant","Resolved",3],
+  ["AUD-114","Finance","Tax Compliance Tool","2025-03-23","Sneha Reddy","Yes","TDS deduction mismatch","Medium","Non-Compliant","Pending",15],
+  ["AUD-033","HR","Employee Portal","2025-03-25","Arun Krishnan","No","No Issue","Low","Compliant","Resolved",2],
+  ["AUD-070","Operations","ERP System","2025-03-26","Suresh Nair","Yes","Custom module unsanctioned","High","Non-Compliant","Pending",32],
+  ["AUD-123","IT","Cloud Storage","2025-03-28","Karthik Raj","No","No Issue","Low","Compliant","Resolved",4],
+  ["AUD-068","Sales","Lead Management","2025-03-28","Priya Sharma","Yes","API key hardcoded in codebase","High","Non-Compliant","Pending",22],
+  ["AUD-105","Finance","Financial Reporting","2025-03-28","Ravi Kumar","No","No Issue","Medium","Compliant","Resolved",6],
+  ["AUD-011","HR","Payroll System","2025-03-28","Deepa Menon","Yes","Double payment detected","High","Non-Compliant","Pending",27],
+  ["AUD-117","Operations","Facility System","2025-03-28","Anjali Singh","No","No Issue","Low","Compliant","Resolved",1],
+];
+
+let filteredData = [...RAW_DATA];
+
+function renderTable(data) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = data.slice(0, 100).map(r => {
+    const riskCls = r[7]==='High'?'high':r[7]==='Medium'?'medium':'low';
+    const compCls = r[8]==='Compliant'?'compliant':'noncompliant';
+    const resCls = r[9]==='Resolved'?'resolved':'pending';
+    return `<tr>
+      <td style="color:var(--accent);font-weight:500">${r[0]}</td>
+      <td>${r[1]}</td>
+      <td style="color:var(--muted)">${r[2]}</td>
+      <td style="color:var(--muted)">${r[3]}</td>
+      <td>${r[4]}</td>
+      <td><span class="badge badge-${riskCls}">${r[7]}</span></td>
+      <td><span class="badge badge-${compCls}">${r[8]}</span></td>
+      <td><span class="badge badge-${resCls}">${r[9]}</span></td>
+      <td style="color:${r[10]>20?'var(--red)':r[10]>10?'var(--amber)':'var(--green)'}">${r[10]}d</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('tableCount').textContent = `Showing ${Math.min(data.length,100)} of ${data.length} records`;
+}
+
+function filterTable(q) {
+  const lower = q.toLowerCase();
+  const data = filteredData.filter(r => r.join(' ').toLowerCase().includes(lower));
+  renderTable(data);
+}
+
+function applyFilter() {
+  const dept = document.getElementById('deptFilter').value;
+  const risk = document.getElementById('riskFilter').value;
+  const status = document.getElementById('statusFilter').value;
+  const res = document.getElementById('resFilter').value;
+
+  filteredData = RAW_DATA.filter(r => {
+    if (dept !== 'all' && r[1] !== dept) return false;
+    if (risk !== 'all' && r[7] !== risk) return false;
+    if (status !== 'all' && r[8] !== status) return false;
+    if (res !== 'all' && r[9] !== res) return false;
+    return true;
+  });
+
+  // Update KPIs
+  const total = filteredData.length;
+  const comp = filteredData.filter(r=>r[8]==='Compliant').length;
+  const high = filteredData.filter(r=>r[7]==='High').length;
+  const open = filteredData.filter(r=>r[9]==='Pending').length;
+  const avgDays = total ? (filteredData.reduce((a,r)=>a+r[10],0)/total).toFixed(1) : 0;
+  const ncomp = filteredData.filter(r=>r[8]==='Non-Compliant').length;
+  const resolved = filteredData.filter(r=>r[9]==='Resolved').length;
+  const med = filteredData.filter(r=>r[7]==='Medium').length;
+  const low = filteredData.filter(r=>r[7]==='Low').length;
+  const issues = filteredData.filter(r=>r[5]==='Yes').length;
+
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('kpi-total-sub').textContent = total + ' records in selection';
+  document.getElementById('kpi-comp').textContent = total ? (comp/total*100).toFixed(1)+'%' : '0%';
+  document.getElementById('kpi-comp-sub').textContent = comp + ' compliant · ' + ncomp + ' non-compliant';
+  document.getElementById('kpi-high').textContent = high;
+  document.getElementById('kpi-high-sub').textContent = total ? (high/total*100).toFixed(1)+'% of selection' : '';
+  document.getElementById('kpi-open').textContent = open;
+  document.getElementById('kpi-open-sub').textContent = total ? (open/total*100).toFixed(1)+'% unresolved' : '';
+  document.getElementById('kpi-avg').textContent = avgDays;
+
+  document.getElementById('p-comp').textContent = comp;
+  document.getElementById('p-ncomp').textContent = ncomp;
+  document.getElementById('p-res').textContent = resolved;
+  document.getElementById('p-pend').textContent = open;
+  document.getElementById('p-high').textContent = high;
+  document.getElementById('p-med').textContent = med;
+  document.getElementById('p-low').textContent = low;
+  document.getElementById('p-issues').textContent = issues;
+
+  renderTable(filteredData);
+}
+
+function exportCSV() {
+  const headers = ['Audit_ID','Department','System_Name','Audit_Date','Auditor_Name','Issue_Found','Issue_Description','Risk_Level','Compliance_Status','Resolution_Status','Resolution_Time_Days'];
+  const rows = filteredData.map(r => r.map(v => `"${v}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'technova_audit_export.csv';
+  a.click();
+}
+
+// Init
+renderTable(RAW_DATA);
+</script>
+</body>
+</html>
